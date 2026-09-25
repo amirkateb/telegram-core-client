@@ -1,7 +1,20 @@
 <?php
+
 namespace KatebSaber\TelegramCore\Exceptions;
+
 class UpstreamException extends TelegramCoreException
 {
-    public function __construct(public readonly int $status, public readonly array $response)
-    { parent::__construct((string) ($response['error'] ?? $response['telegram']['description'] ?? 'Telegram Core request failed'), $status); }
+    /** @var int */
+    public $status;
+
+    /** @var array<string,mixed> */
+    public $response;
+
+    public function __construct(int $status, array $response)
+    {
+        $this->status = $status;
+        $this->response = $response;
+
+        parent::__construct((string) ($response['error'] ?? $response['telegram']['description'] ?? 'Telegram Core request failed'), $status);
+    }
 }

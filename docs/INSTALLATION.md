@@ -1,12 +1,58 @@
 # Installation and deployment
 
-1. Install with Composer: `composer require amirkateb/telegram-core-client`.
-2. Run `php artisan tgcore:install`.
-3. Set `TGCORE_URL`, `TGCORE_BOT_UUID`, `TGCORE_CONSUMER_SECRET` in environment configuration.
-4. Keep the Consumer Secret server-side. Never expose it to JavaScript or a mobile app.
-5. Run `php artisan tgcore:doctor` and `php artisan tgcore:status`.
-6. Configure the client's public HTTPS `/tgcore/webhook` URL as the bot Consumer URL in Core.
-7. Add listeners for `TelegramUpdateReceived` and keep business side effects idempotent.
-8. In production rebuild Laravel configuration/route caches after environment changes.
+## Supported applications
 
-`TGCORE_URL` is environment-specific. The SDK never hard-codes the Core domain.
+SDK `1.0.0` supports Laravel **8, 9, 10, 11, 12 and 13**.
+
+The package itself allows PHP `^7.3|^8.0`; Composer will apply the stricter PHP requirement of your Laravel major. For example, Laravel 13 requires PHP 8.3 or newer.
+
+## Install
+
+```bash
+composer require amirkateb/telegram-core-client:^1.0
+php artisan tgcore:install
+```
+
+Laravel auto-discovery registers the provider and facade automatically.
+
+## Configure
+
+Add the TGCore connection values supplied by the Core administrator:
+
+```dotenv
+TGCORE_URL=https://tg.example.com
+TGCORE_BOT_UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+TGCORE_CONSUMER_SECRET=replace-with-private-consumer-secret
+TGCORE_CONSUMER_PATH=/tgcore/webhook
+TGCORE_TIMEOUT=30
+TGCORE_CONNECT_TIMEOUT=7
+TGCORE_SIGNATURE_TOLERANCE=300
+```
+
+`TGCORE_URL` is environment-specific and must use HTTPS. The SDK never hard-codes the Core domain and never needs the Telegram Bot Token.
+
+## Validate
+
+```bash
+php artisan tgcore:doctor
+php artisan tgcore:status
+```
+
+Then configure the application's public HTTPS Consumer URL in TGCore, usually:
+
+```text
+https://your-app.example.com/tgcore/webhook
+```
+
+Add listeners for `TelegramUpdateReceived` and keep irreversible business side effects idempotent because delivery is at-least-once.
+
+## Production deployment
+
+After changing environment configuration, rebuild the Laravel caches using the commands appropriate for your application version, for example:
+
+```bash
+php artisan optimize:clear
+php artisan optimize
+```
+
+Keep `TGCORE_CONSUMER_SECRET` server-side. Never expose it to JavaScript, mobile clients, browser bundles, logs, debug pages, or public repositories.
